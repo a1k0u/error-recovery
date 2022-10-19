@@ -3,9 +3,11 @@
 Пусть у нас есть какой-то абстрактный язык программирования, в котором перед оператором `else` не требуется `;` (например в качестве такого абстрактного языка можно взять `Pascal`).  Напишем грамматику, описывающую `if statement` в таком языке.
 
 ```
-IF-STATEMENT -> IF boolean-expr THEN 
+if-statement -> IF boolean-expr THEN 
                 statement else-part
 else-part    -> ELSE statement | EPS 
+statement    -> ID ASSIGN ID
+boolean-expr -> ID EQ ID
 ```
 
 Эта грамматика не использует `Error production` для восстановления после ошибок. 
@@ -16,7 +18,9 @@ else-part    -> ELSE statement | EPS
 
 Новая грамматика:
 ```
-IF-STATEMENT -> IF boolean-expr THEN 
+if-statement -> IF boolean-expr THEN 
                 statement else-part
 else-part    -> ELSE statement | EPS | SEMICOLON ELSE statement 
+statement    -> ID EQ ID
+boolean-expr -> ID EQ ID
 ```

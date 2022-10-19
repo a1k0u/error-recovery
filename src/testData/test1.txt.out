@@ -1,0 +1,3 @@
+Bool expression: x == y
+First branch: x = z
+Second branch: x = b
