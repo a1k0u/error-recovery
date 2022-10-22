@@ -1,11 +1,9 @@
 import ply.lex as lex
-import sys
-
 
 tokens = [
-             'OPENING',
-             'CLOSING'
-         ]
+    'OPENING',
+    'CLOSING'
+]
 
 t_OPENING = r'\('
 t_CLOSING = r'\)'
@@ -25,25 +23,12 @@ def t_error(t):
 lexer = lex.lex()
 
 
-def main():
-    result = ""
-    filename = sys.argv[1]
-
-    try:
-        file = open(filename)
-    except:
-        pass
-
-    text = file.read()
+def lex(text) -> list:
+    result = []
     lexer.input(text)
     while True:
         tok = lexer.token()
         if not tok:
             break
-        result += str(tok) + "\n"
-    with open(filename + ".out", "w") as fo:
-        fo.write(result)
-
-
-if __name__ == "__main__":
-    main()
+        result.append(tok)
+    return result

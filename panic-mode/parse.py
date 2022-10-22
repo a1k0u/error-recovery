@@ -1,62 +1,34 @@
 import sys
 from typing import List
 
-import ply.yacc as yacc
-
-from lex import tokens
+from lex import lex
 from printer import Printer
 
 
-class Error:
+class VPParser:
     def __init__(self):
-        self.exit_code = 1
+        self.ans = ""
+        self.error_code = 0
 
+    def parse(self, tokens) -> str:
+        stack = []
+        for tok in tokens:
+            if tok.type == 'OPENING':
+                stack.append(tok)
+            elif tok.type == 'CLOSING':
+                if len(stack) == 0:
+                    printer.print_error('log.txt', tokens, 'Unexpected closing bracket', tok.lexpos)
+                    self.error_code = 1
+                else:
+                    stack.pop()
+            self.ans += tok.value
 
-def p_if_statement(p):
-    """
-    if_statement : IF bool_expr THEN statement else_part
-    """
-    if any([token is None for token in [p[1], p[2], p[3], p[4], p[5]]]):
-        p[0] = Error()
-        return
-    p[0] = Condition(p[2], p[4], p[5])
-
-
-def p_start(p):
-    """
-    bool_expr : ID EQ ID
-    """
-    p[0] = " ".join([p[1], p[2], p[3]])
-
-
-def p_statement(p):
-    """
-    statement : ID ASSIGN ID
-    """
-    p[0] = " ".join([p[1], p[2], p[3]])
-
-
-def p_else_part(p):
-    """
-    else_part :      ELSE statement SEMICOLON
-                   | empty
-                   | SEMICOLON ELSE statement SEMICOLON
-    """
-    if len(p) == 5:
-        printer.print_error(outfile, ERROR_MSG[p[1]], [p[1], p[2], p[3], p[4]], 0)
-        return
-    if len(p) == 2:
-        return
-    p[0] = p[2]
-
-
-def p_empty(p):
-    """empty :"""
-    pass
-
-
-def p_error(p):
-    print("Error")
+        if len(stack) != 0:
+            while len(stack) != 0:
+                tok = stack.pop()
+                printer.print_error('log.txt', tokens, 'Opening bracket is not closed', tok.lexpos)
+                self.error_code = 2
+        return self.ans
 
 
 printer = Printer()
@@ -64,8 +36,6 @@ outfile = str()
 
 
 def main():
-    parser = yacc.yacc()
-
     filename = sys.argv[1]
     try:
         file = open(filename)
@@ -74,11 +44,12 @@ def main():
         return
 
     text = file.read()
-    result = parser.parse(text)
-    print(result)
-    if result.exit_code == 1:
-        return
-    printer.print_condition(result, outfile)
+    tokens = lex(text)
+    parser = VPParser()
+    result = parser.parse(tokens)
+
+    if parser.error_code == 0:
+        printer.print_condition(result, outfile)
 
 
 if __name__ == "__main__":
