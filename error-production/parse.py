@@ -2,13 +2,14 @@ import sys
 from typing import List
 
 import ply.yacc as yacc
- 
+
 from lex import tokens
 from printer import Printer
 
 ERROR_MSG = {
     ";": "Found unexpected semicolon before else"
 }
+
 
 class Condition:
     def __init__(self, bool_expr: str, statement: str, else_statement: str):
@@ -17,9 +18,11 @@ class Condition:
         self.else_statement = else_statement
         self.exit_code = 0
 
+
 class Error:
     def __init__(self):
         self.exit_code = 1
+
 
 def p_if_statement(p):
     '''
@@ -29,18 +32,21 @@ def p_if_statement(p):
         p[0] = Error()
         return
     p[0] = Condition(p[2], p[4], p[5])
-    
+
+
 def p_start(p):
     '''
     bool_expr : ID EQ ID
     '''
     p[0] = " ".join([p[1], p[2], p[3]])
 
+
 def p_statement(p):
     '''
     statement : ID ASSIGN ID
     '''
     p[0] = " ".join([p[1], p[2], p[3]])
+
 
 def p_else_part(p):
     '''
@@ -55,19 +61,23 @@ def p_else_part(p):
         return
     p[0] = p[2]
 
+
 def p_empty(p):
-     'empty :'
-     pass
+    'empty :'
+    pass
+
 
 def p_error(p):
     print("Error")
 
+
 printer = Printer()
 outfile = str()
 
+
 def main():
     parser = yacc.yacc()
- 
+
     filename = sys.argv[1]
     try:
         file = open(filename)
@@ -81,7 +91,7 @@ def main():
         return
     printer.print_condition(result, outfile)
 
+
 if __name__ == "__main__":
     outfile = sys.argv[1] + ".out"
     main()
-    
