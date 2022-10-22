@@ -77,7 +77,6 @@ def main():
 
     text = file.read()
     result = parser.parse(text)
-    print(result)
     if result.exit_code == 1:
         return
     printer.print_condition(result, outfile)
