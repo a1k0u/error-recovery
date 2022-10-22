@@ -17,7 +17,7 @@ class VPParser:
                 stack.append(tok)
             elif tok.type == 'CLOSING':
                 if len(stack) == 0:
-                    printer.print_error('log.txt', tokens, 'Unexpected closing bracket', tok.lexpos)
+                    printer.print_error(outfile, tokens, 'Unexpected closing bracket', tok.lexpos)
                     self.error_code = 1
                 else:
                     stack.pop()
@@ -26,7 +26,7 @@ class VPParser:
         if len(stack) != 0:
             while len(stack) != 0:
                 tok = stack.pop()
-                printer.print_error('log.txt', tokens, 'Opening bracket is not closed', tok.lexpos)
+                printer.print_error(outfile, tokens, 'Opening bracket is not closed', tok.lexpos)
                 self.error_code = 2
         return self.ans
 
@@ -54,4 +54,5 @@ def main():
 
 if __name__ == "__main__":
     outfile = sys.argv[1] + ".out"
+    open(outfile, 'w').close()
     main()
