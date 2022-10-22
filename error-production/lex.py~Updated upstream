@@ -44,16 +44,6 @@ t_RBR = r'\)'
 
 t_ignore = ' \t'
 
-<<<<<<< Updated upstream:error-production/lex.py
-def t_newline(t):
-  r'\n+'
-  t.LEXER.lineno += len(t.value)
-
-def t_error(t):
-  print("Illegal character '%s'" % t.value[0])
-  t.LEXER.skip(1)
-  
-=======
 
 def t_ID(t: ply.lex.LexToken):
     r"""[A-Za-z][A-Za-z0-9_]*"""
@@ -75,7 +65,6 @@ def t_newline(t: ply.lex.LexToken):
 def t_error(t: ply.lex.LexToken):
     raise TokenError(f"Syntax error: Illegal character '{t.value[0]}'.")
 
->>>>>>> Stashed changes:src/lex.py
 
 lexer = lex.lex()
 
