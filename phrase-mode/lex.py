@@ -9,7 +9,7 @@ Example:
     OUT b;
 """
 
-import ply
+import ply.lex as lex
 import os
 import sys
 
@@ -17,8 +17,6 @@ import sys
 class TokenError(Exception):
     pass
 
-
-LEXER = ply.lex.lex()
 
 reserved = {
     "out": "OUT"
@@ -37,57 +35,33 @@ t_PLUS = r"\+"
 t_ASSIGN = r"\="
 t_SEMICOLON = r"\;"
 
+t_ignore = r" "
 
-def t_VAR(t: ply.lex.LexToken):
+
+def t_VAR(t: lex.LexToken):
     r"""[a-zA-Z][0-9a-zA-Z_]*"""
-    t.type = reserved.get(t.value, "VAR")
+    if t.value == "OUT":
+        t.type = "OUT"
+    else:
+        t.type = "VAR"
     return t
 
 
-def t_NUM(t: ply.lex.LexToken):
-    r"""[0-9]+"""
+def t_NUM(t: lex.LexToken):
+    r"""\d+"""
     t.value = int(t.value)
+    return t
 
 
-def t_newline(t: ply.lex.LexToken):
+def t_newline(t: lex.LexToken):
     r"""\n+"""
     t.lexer.lineno += len(t.value)
 
 
-def t_error(t: ply.lex.LexToken):
+def t_error(t: lex.LexToken):
     raise TokenError(
         f"Syntax error: Illegal character '{t.value[0]}'."
     )
 
 
-def main():
-    if len(sys.argv) == 1:
-        exit("Waiting your file ...")
-
-    if not os.path.exists(sys.argv[1]):
-        exit("File not found ...")
-
-    file_path = os.path.abspath(sys.argv[1])
-
-    with open(file_path, "r", encoding="utf-8") as read_lang, open(
-        file_path + ".out", "w"
-    ) as write_lang:
-        for line in read_lang.readlines():
-            LEXER.input(line.rstrip())
-
-            while True:
-                try:
-                    token = LEXER.token()
-                except TokenError as e:
-                    exit(*e.args)
-
-                if not token:
-                    break
-
-                print(token, file=write_lang)
-
-    print("File is processed ...")
-
-
-if __name__ == "__main__":
-    main()
+lexer = lex.lex()
