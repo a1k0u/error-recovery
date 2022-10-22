@@ -1,0 +1,3 @@
+Found unexpected semicolon before else
+ ; else x = b ;
+^^^~~~~~~~~~~~~~
