@@ -7,8 +7,10 @@ import os
 from typing import List
 from lex import tokens
 from lex import TokenError
+from lex import lexer
 
 LINES: List[str] = []
+FIX_OPERATOR = False
 STDERR_FILE = None
 VARIABLES = {}
 
@@ -30,7 +32,7 @@ def p_output(p):
               | empty
     """
 
-    if len(p) == 5:
+    if len(p) == 5 and p[2]:
         print(p[2])
 
     p[0] = not None
@@ -85,18 +87,47 @@ def p_empty(_):
     pass
 
 
-def p_error(p):
+def p_error_expression(p):
+    """
+    expression : expression expression
+    """
 
+    global FIX_OPERATOR
+
+    p[0] = p[1] + p[2]
+
+    lexer.input(LINES[-1])
+
+    token_prev = lexer.token()
+    while True:
+        token_new = lexer.token()
+
+        if token_prev.type in ("NUM", "VAR") and token_new.type in ("NUM", "VAR"):
+            st1, fn1 = token_prev.lexpos, len(str(token_prev.value))
+            st2, fn2 = token_new.lexpos, len(str(token_new.value))
+            break
+
+        token_prev, token_new = token_new, None
+
+    c = LINES[-1]
+    __correct_line(
+        "warning: expected plus in expression",
+        f"{c[: st1]}{c[st1 : st1 + fn1]} + {c[st2 : st2 + fn2]}{c[st2 + fn2 :]}",
+    )
+
+    FIX_OPERATOR = True
+
+
+def p_error(p):
     if p is None:
         raise ParserError(
-            __correct_line("error: Unexpected end of file", f"{LINES[-1]};")
+            __correct_line("warning: expected ';'", f"{LINES[-1]};")
         )
 
-    print(p)
+    if FIX_OPERATOR:
+        raise ParserError
 
-    raise ParserError(
-        __correct_line("error: incorrect output", "OUT -1;")
-    )
+    raise ParserError(__correct_line("warning: incorrect output", "OUT -1;"))
 
 
 PARSER = yacc.yacc()
@@ -114,12 +145,14 @@ def main():
     with open(file_path, "r", encoding="utf-8") as code_in, open(
         f"{file_path}.stdout", "w"
     ) as code_out, open(f"{file_path}.stderr", "w") as code_err:
-        global STDERR_FILE
+        global STDERR_FILE, FIX_OPERATOR
 
         STDERR_FILE = code_err
 
         for line in code_in.readlines():
             LINES.append(line.rstrip())
+
+            FIX_OPERATOR = False
 
             result = None
             while result is None:
