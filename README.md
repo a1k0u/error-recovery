@@ -180,6 +180,9 @@ Opening bracket is not closed
 
 
 ###### Пример
+Код на придуманном `plus-expression-variable-output-lang`,
+вкратце **PEVOL**.
+
 ```python
 ;
 1 + 1;
