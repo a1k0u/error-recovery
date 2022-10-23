@@ -1,10 +1,9 @@
-import io
-
 import ply.yacc as yacc
 
 import sys
 import os
 from typing import List
+
 from lex import tokens
 from lex import TokenError
 from lex import lexer
@@ -32,7 +31,7 @@ def p_output(p):
               | empty
     """
 
-    if len(p) == 5 and p[2]:
+    if len(p) == 5 and p[2] is not None:
         print(p[2])
 
     p[0] = not None
@@ -54,7 +53,7 @@ def p_variable(p):
     """
 
     VARIABLES[p[1]] = p[3]
-    p[0] = not None
+    p[0] = p[3]
 
 
 def p_expression_plus(p):
@@ -120,12 +119,22 @@ def p_error_expression(p):
 
 def p_error(p):
     if p is None:
-        raise ParserError(
-            __correct_line("warning: expected ';'", f"{LINES[-1]};")
-        )
+        raise ParserError(__correct_line("warning: expected ';'", f"{LINES[-1]};"))
 
     if FIX_OPERATOR:
         raise ParserError
+
+    if p.type == "ASSIGN":
+        p.type = "PLUS"
+        p.value = "+"
+
+        c = LINES[-1]
+        raise ParserError(
+            __correct_line(
+                "warning: expected plus, got assign",
+                f"{c[:p.lexpos]} + {c[p.lexpos + 1:]}",
+            )
+        )
 
     raise ParserError(__correct_line("warning: incorrect output", "OUT -1;"))
 
