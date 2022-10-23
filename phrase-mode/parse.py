@@ -1,3 +1,29 @@
+"""
+    Language for testing phrase
+    mode error recovery strategy.
+
+    There is a code which have errors: miss semicolons,
+                                       miss operation,
+                                       expected plus, but got assign,
+                                       and their combination:
+        OUT 5 1 + aba = 1033 + 1
+
+        a = b + 1 + c + 10
+        k = a b c d + 10 + 2 5 + 1
+        b = 10; OUT b; b = 20; OUT b
+
+        OUT a
+
+    It will transform into:
+        OUT 5 + 1 + aba  +  1033 + 1;
+        
+        a = b + 1 + c + 10;
+        k = a + b + c + d + 10 + 2 + 5 + 1;
+        b = 10; OUT b; b = 20; OUT b;
+
+        OUT a;
+"""
+
 import ply.yacc as yacc
 
 import sys
@@ -5,7 +31,6 @@ import os
 from typing import List
 
 from lex import tokens
-from lex import TokenError
 from lex import lexer
 
 LINES: List[str] = []
@@ -171,8 +196,6 @@ def main():
                     continue
 
         code_out.write("\n".join(LINES))
-
-    print("File is processed ...")
 
 
 if __name__ == "__main__":

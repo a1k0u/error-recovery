@@ -18,18 +18,9 @@ class TokenError(Exception):
     pass
 
 
-reserved = {
-    "out": "OUT"
-}
+reserved = {"out": "OUT"}
 
-tokens = [
-    "VAR",
-    "NUM",
-    "ASSIGN",
-    "SEMICOLON",
-    "PLUS",
-    *reserved.values()
-]
+tokens = ["VAR", "NUM", "ASSIGN", "SEMICOLON", "PLUS", *reserved.values()]
 
 t_PLUS = r"\+"
 t_ASSIGN = r"\="
@@ -59,9 +50,7 @@ def t_newline(t: lex.LexToken):
 
 
 def t_error(t: lex.LexToken):
-    raise TokenError(
-        f"Syntax error: Illegal character '{t.value[0]}'."
-    )
+    raise TokenError(f"Syntax error: Illegal character '{t.value[0]}'.")
 
 
 lexer = lex.lex()

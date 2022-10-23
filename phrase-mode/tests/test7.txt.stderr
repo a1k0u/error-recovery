@@ -1,0 +1,13 @@
+warning: expected ';' at 5 line.
+warning: expected plus in expression at 6 line.
+warning: expected plus, got assign at 8 line.
+warning: expected ';' at 8 line.
+warning: expected plus in expression at 8 line.
+warning: expected ';' at 10 line.
+warning: expected ';' at 11 line.
+warning: expected plus in expression at 11 line.
+warning: expected plus in expression at 11 line.
+warning: expected plus in expression at 11 line.
+warning: expected plus in expression at 11 line.
+warning: expected ';' at 12 line.
+warning: expected ';' at 16 line.
