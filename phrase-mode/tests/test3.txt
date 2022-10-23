@@ -1,0 +1,2 @@
+a = 100; OUT a; a = a + 1; OUT a; a = a + 1; OUT a;
+OUT a;
