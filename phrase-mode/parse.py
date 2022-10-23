@@ -1,3 +1,5 @@
+import io
+
 import ply.yacc as yacc
 
 import sys
@@ -7,6 +9,7 @@ from lex import tokens
 from lex import TokenError
 
 LINES: List[str] = []
+STDERR_FILE = None
 VARIABLES = {}
 
 
@@ -14,24 +17,42 @@ class ParserError(Exception):
     pass
 
 
+def __correct_line(warning_message: str, correct_code: str) -> str:
+    STDERR_FILE.write(f"{warning_message} at {len(LINES)} line.\n")
+    LINES[-1] = correct_code
+    return warning_message
+
+
 def p_output(p):
     """
-    output : OUT VAR SEMICOLON
+    operation : OUT object SEMICOLON operation
+              | object SEMICOLON operation
+              | empty
     """
 
-    variable_value = VARIABLES.get(p[2], 0)
-    print(variable_value)
+    if len(p) == 5:
+        print(p[2])
 
-    p[0] = variable_value
+    p[0] = not None
+
+
+def p_object(p):
+    """
+    object : variable
+           | expression
+           | empty
+    """
+
+    p[0] = p[1]
 
 
 def p_variable(p):
     """
-    output : VAR ASSIGN expression SEMICOLON
+    variable : VAR ASSIGN expression
     """
 
     VARIABLES[p[1]] = p[3]
-    p[0] = p[3]
+    p[0] = not None
 
 
 def p_expression_plus(p):
@@ -58,12 +79,24 @@ def p_expression_variable(p):
     p[0] = VARIABLES.get(p[1], 0)
 
 
-def p_error(p):
-    if p is None:
-        raise ParserError("Syntax error: Unexpected end of file ...")
+def p_empty(_):
+    """empty :"""
 
-    token = f"{p.type}({p.value}) on line {p.lineno}"
-    raise ParserError(f"Syntax error: Unexpected {token}")
+    pass
+
+
+def p_error(p):
+
+    if p is None:
+        raise ParserError(
+            __correct_line("error: Unexpected end of file", f"{LINES[-1]};")
+        )
+
+    print(p)
+
+    raise ParserError(
+        __correct_line("error: incorrect output", "OUT -1;")
+    )
 
 
 PARSER = yacc.yacc()
@@ -80,21 +113,22 @@ def main():
 
     with open(file_path, "r", encoding="utf-8") as code_in, open(
         f"{file_path}.stdout", "w"
-    ) as code_out:
-        for line in code_in.readlines():
-            PARSER.parse(line)
+    ) as code_out, open(f"{file_path}.stderr", "w") as code_err:
+        global STDERR_FILE
 
-            """
+        STDERR_FILE = code_err
+
+        for line in code_in.readlines():
             LINES.append(line.rstrip())
 
-            try:
-                result = PARSER.parse(LINES[-1])
-                while not result:
+            result = None
+            while result is None:
+                try:
                     result = PARSER.parse(LINES[-1])
-            except (ParserError, TokenError) as e:
-                exit(*e.args)"""
+                except ParserError:
+                    continue
 
-        # code_out.writelines(LINES)
+        code_out.write("\n".join(LINES))
 
     print("File is processed ...")
 
