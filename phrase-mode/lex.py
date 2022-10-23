@@ -48,7 +48,7 @@ def t_VAR(t: lex.LexToken):
 
 
 def t_NUM(t: lex.LexToken):
-    r"""\d+"""
+    r"""[\-]?\d+"""
     t.value = int(t.value)
     return t
 
